@@ -20,6 +20,7 @@ ktorClientCore = "3.0.0"
 runner = "1.7.0"
 core = "1.7.0"
 navigationComposeVersion = "2.9.0-beta04"
+material3AdaptiveNavigationSuite = "1.8.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -42,6 +43,7 @@ ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorCli
 ktor-network = { module = "io.ktor:ktor-network", version.ref = "ktorClientCore" }
 ktor-utils = { module = "io.ktor:ktor-utils", version.ref = "ktorClientCore" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationComposeVersion" }
+material3-adaptive-navigation-suite = { module = "org.jetbrains.compose.material3:material3-adaptive-navigation-suite", version.ref = "material3AdaptiveNavigationSuite" }
 
 [plugins]
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin"}

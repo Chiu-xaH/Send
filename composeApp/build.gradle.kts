@@ -26,8 +26,6 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":core"))
             implementation(libs.kotlin.stdlib)
-            implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.navigation.compose)
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
@@ -36,6 +34,12 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            // 协程
+            implementation(libs.kotlinx.coroutines.core)
+            // 自适应横竖屏布局
+            implementation(libs.material3.adaptive.navigation.suite)
+            // 导航
+            implementation(libs.navigation.compose)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

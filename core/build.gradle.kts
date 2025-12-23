@@ -15,8 +15,11 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(libs.kotlin.stdlib)
+                // 协程
                 implementation(libs.kotlinx.coroutines.core)
+                // Serialization JSON反序列化
                 implementation(libs.kotlinx.serialization.json)
+                // Ktor 网络框架
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.network)
                 implementation(libs.ktor.utils)
@@ -30,11 +33,9 @@ kotlin {
         }
 
         androidMain {
-            dependencies {
-            }
+            dependencies {}
         }
 
-        jvmMain.dependencies {
-        }
+        jvmMain.dependencies {}
     }
 }
