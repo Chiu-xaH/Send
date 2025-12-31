@@ -10,6 +10,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.xah.send.ui.model.NavigationRoute
+import com.xah.send.ui.screen.receive.ReceiveScreen
+import com.xah.send.ui.screen.send.SendScreen
+import com.xah.send.ui.screen.settings.SettingsScreen
 import com.xah.send.ui.util.currentRouteWithoutArgs
 import com.xah.send.ui.util.navigateForBottomBar
 import org.jetbrains.compose.resources.painterResource
@@ -60,13 +63,13 @@ fun App() {
                 startDestination = defaultPage.route
             ) {
                 composable(NavigationRoute.Receive.bean.route) {
-
+                    ReceiveScreen()
                 }
                 composable(NavigationRoute.Send.bean.route) {
-
+                    SendScreen()
                 }
                 composable(NavigationRoute.Settings.bean.route) {
-
+                    SettingsScreen()
                 }
             }
         }

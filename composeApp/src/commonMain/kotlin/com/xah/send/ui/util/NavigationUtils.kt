@@ -15,7 +15,6 @@ fun NavController.navigateForBottomBar(route: String) {
     }
 }
 
-
 @Composable
 fun NavController.currentRouteWithArgWithoutValues() : String? = this.currentBackStackEntryAsState().value?.destination?.route
 
