@@ -25,11 +25,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavUri
-import com.send.core.bean.HelloPacket
-import com.send.core.bean.RemoteDevice
-import com.xah.send.logic.model.Platform
-import com.xah.send.logic.util.getDeviceName
+import com.xah.send.logic.model.bean.HelloPacket
+import com.xah.send.logic.model.bean.RemoteDevice
+import com.xah.send.logic.util.UdpHelloListener
+import com.xah.send.logic.util.broadcastHello
+import com.xah.send.logic.util.handleHello
 import com.xah.send.logic.util.simpleLog
 import com.xah.send.ui.componment.APP_HORIZONTAL_DP
 import com.xah.send.ui.componment.CARD_NORMAL_DP
@@ -39,14 +39,11 @@ import com.xah.send.ui.componment.LargeButton
 import com.xah.send.ui.componment.cardNormalColor
 import com.xah.send.ui.style.CustomFloatingActionButtonShadow
 import com.xah.send.ui.style.textFiledTransplant
-import kotlinx.coroutines.CoroutineScope
+import com.xah.send.ui.util.GlobalStateHolder
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.painterResource
 import send.composeapp.generated.resources.Res
@@ -55,112 +52,11 @@ import send.composeapp.generated.resources.deployed_code
 import send.composeapp.generated.resources.files
 import send.composeapp.generated.resources.keyboard_alt
 import send.composeapp.generated.resources.send
-import java.net.DatagramPacket
-import java.net.DatagramSocket
-import java.net.Inet4Address
-import java.net.InetAddress
 import java.net.InetSocketAddress
-import java.net.NetworkInterface
-import java.net.ServerSocket
 import java.net.Socket
-import java.net.SocketException
 import java.nio.ByteBuffer
-import java.util.UUID
 
 private val buttonPadding = CARD_NORMAL_DP*4
-
-const val DISCOVERY_PORT = 9527
-
-object GlobalStateHolder {
-    val localHelloPacket = createLocalHelloPacket()
-    var localIp by mutableStateOf<InetSocketAddress?>(null)
-    // 全局一次就行 除非要刷新
-    private fun createLocalHelloPacket(): HelloPacket {
-        val tcpPort = ServerSocket(0).use { it.localPort }
-        return HelloPacket(
-            deviceId = UUID.randomUUID().toString(),
-            deviceName = getDeviceName(),
-            tcpPort = tcpPort
-        )
-    }
-}
-
-fun handleHello(
-    packet: HelloPacket,
-    fromIp: String,
-    devices: MutableMap<String, RemoteDevice>
-) {
-    val now = System.currentTimeMillis()
-
-    val device = devices[packet.deviceId]
-    if (device == null) {
-        devices[packet.deviceId] = RemoteDevice(
-            deviceId = packet.deviceId,
-            deviceName = packet.deviceName,
-            ip = fromIp,
-            tcpPort = packet.tcpPort,
-            lastSeen = now
-        )
-    } else {
-        device.lastSeen = now
-    }
-}
-
-// 开始监听
-fun broadcastHello(helloPacket: HelloPacket) {
-    val socket = DatagramSocket().apply {
-        broadcast = true
-    }
-
-    val data = Json.encodeToString(helloPacket).toByteArray()
-
-    socket.send(
-        DatagramPacket(data, data.size, InetAddress.getByName("255.255.255.255"), DISCOVERY_PORT)
-    )
-
-    socket.close()
-}
-
-// 发广播
-class UdpHelloListener(
-    private val onReceive: (String, InetAddress) -> Unit
-) {
-    private var socket: DatagramSocket? = null
-    private var job: Job? = null
-
-    fun start(scope: CoroutineScope) {
-        if (job != null) return   // 防止重复启动
-
-        job = scope.launch(Dispatchers.IO) {
-            try {
-                socket = DatagramSocket(DISCOVERY_PORT)
-                val buffer = ByteArray(1024)
-
-                while (isActive) {
-                    val packet = DatagramPacket(buffer, buffer.size)
-                    socket?.receive(packet)  // 阻塞点
-
-                    val msg = String(packet.data, 0, packet.length)
-                    onReceive(msg, packet.address)
-                }
-            } catch (e: SocketException) {
-                // 正常关闭 socket 会走到这里，不要当错误
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                socket?.close()
-                socket = null
-            }
-        }
-    }
-
-    fun stop() {
-        job?.cancel()     // 取消协程
-        job = null
-        socket?.close()   // 强制打断 receive()
-        socket = null
-    }
-}
 
 @Composable
 fun SendScreen() {

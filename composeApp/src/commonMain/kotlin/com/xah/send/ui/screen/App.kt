@@ -10,13 +10,13 @@ import androidx.compose.runtime.remember
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.xah.send.logic.util.ReceiveServer
 import com.xah.send.logic.util.simpleLog
 import com.xah.send.ui.model.NavigationRoute
 import com.xah.send.ui.screen.receive.ReceiveScreen
-import com.xah.send.ui.screen.receive.ReceiveServerManager
-import com.xah.send.ui.screen.send.GlobalStateHolder
 import com.xah.send.ui.screen.send.SendScreen
 import com.xah.send.ui.screen.settings.SettingsScreen
+import com.xah.send.ui.util.GlobalStateHolder
 import com.xah.send.ui.util.currentRouteWithoutArgs
 import com.xah.send.ui.util.navigateForBottomBar
 import kotlinx.coroutines.Dispatchers
@@ -41,7 +41,7 @@ fun App() {
         simpleLog("本地初始化完成")
         // 监听接收事件
         withContext(Dispatchers.IO) {
-            ReceiveServerManager.start(this@LaunchedEffect) { data,address ->
+            ReceiveServer.start(this@LaunchedEffect) { data, address ->
                 simpleLog("接收数据 $data")
             }
         }

@@ -25,7 +25,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
         }
         commonMain.dependencies {
-            implementation(project(":core"))
+//            implementation(project(":core"))
             implementation(libs.kotlin.stdlib)
             implementation(compose.runtime)
             implementation(compose.foundation)

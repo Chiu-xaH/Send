@@ -1,4 +1,4 @@
-package com.send.core.bean
+package com.xah.send.logic.model.bean
 
 data class LocalDevice(
     val deviceId: String,

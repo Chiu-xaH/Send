@@ -33,4 +33,3 @@ plugins {
 }
 
 include(":composeApp")
-include(":core")
