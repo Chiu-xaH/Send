@@ -20,9 +20,9 @@ kotlin {
                 // Serialization JSON反序列化
                 implementation(libs.kotlinx.serialization.json)
                 // Ktor 网络框架
-                implementation(libs.ktor.client.core)
-                implementation(libs.ktor.network)
-                implementation(libs.ktor.utils)
+//                implementation(libs.ktor.client.core)
+//                implementation(libs.ktor.network)
+//                implementation(libs.ktor.utils)
             }
         }
 

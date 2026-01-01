@@ -12,7 +12,7 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = "Send",
         state = WindowState(position = WindowPosition.Aligned(Alignment.Center)),
-        alwaysOnTop = true
+//        alwaysOnTop = true
     ) {
         App()
     }
