@@ -12,11 +12,12 @@ import androidx.navigation.compose.rememberNavController
 import com.xah.send.logic.model.state.ReceiveTask
 import com.xah.send.logic.function.transfer.Receiver
 import com.xah.send.logic.util.simpleLog
+import com.xah.send.ui.model.navigation.AppNavRoute
 import com.xah.send.ui.screen.home.HomeScreen
 import com.xah.send.ui.screen.receive.ReceiveFileScreen
 import com.xah.send.ui.screen.receive.ReceiveTextScreen
-import com.xah.send.ui.util.GlobalStateHolder
-import com.xah.send.ui.util.LocalAppNavController
+import com.xah.send.ui.viewmodel.GlobalStateHolder
+import com.xah.send.ui.util.navigation.LocalAppNavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

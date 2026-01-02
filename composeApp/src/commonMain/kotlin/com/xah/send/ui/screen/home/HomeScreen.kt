@@ -8,18 +8,18 @@ import androidx.compose.runtime.remember
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.xah.send.ui.model.NavigationRoute
+import com.xah.send.ui.model.navigation.home.HomeNavigationRoute
 import com.xah.send.ui.screen.home.receive.ReceiveScreen
 import com.xah.send.ui.screen.home.send.SendScreen
 import com.xah.send.ui.screen.home.settings.SettingsScreen
-import com.xah.send.ui.util.currentRouteWithoutArgs
-import com.xah.send.ui.util.navigateForBottomBar
+import com.xah.send.ui.util.navigation.currentRouteWithoutArgs
+import com.xah.send.ui.util.navigation.navigateForBottomBar
 import org.jetbrains.compose.resources.painterResource
 
 private val navigationItems = listOf(
-    NavigationRoute.Send.bean,
-    NavigationRoute.Receive.bean,
-    NavigationRoute.Settings.bean,
+    HomeNavigationRoute.Send.bean,
+    HomeNavigationRoute.Receive.bean,
+    HomeNavigationRoute.Settings.bean,
 )
 
 @Composable
@@ -59,13 +59,13 @@ fun HomeScreen() {
             navController = navController,
             startDestination = defaultPage.route
         ) {
-            composable(NavigationRoute.Receive.bean.route) {
+            composable(HomeNavigationRoute.Receive.bean.route) {
                 ReceiveScreen()
             }
-            composable(NavigationRoute.Send.bean.route) {
+            composable(HomeNavigationRoute.Send.bean.route) {
                 SendScreen()
             }
-            composable(NavigationRoute.Settings.bean.route) {
+            composable(HomeNavigationRoute.Settings.bean.route) {
                 SettingsScreen()
             }
         }

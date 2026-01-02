@@ -1,4 +1,4 @@
-package com.xah.send.ui.style
+package com.xah.send.ui.style.align
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

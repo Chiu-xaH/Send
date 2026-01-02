@@ -15,10 +15,10 @@ import androidx.compose.ui.Modifier
 import com.xah.send.logic.function.find.FinsDevicesHelper
 import com.xah.send.logic.function.transfer.Receiver
 import com.xah.send.logic.util.showToast
-import com.xah.send.ui.componment.CustomCard
-import com.xah.send.ui.componment.DividerTextExpandedWith
-import com.xah.send.ui.componment.TransplantListItem
-import com.xah.send.ui.componment.cardNormalColor
+import com.xah.send.ui.componment.container.CustomCard
+import com.xah.send.ui.componment.text.DividerTextExpandedWith
+import com.xah.send.ui.componment.container.TransplantListItem
+import com.xah.send.ui.componment.container.cardNormalColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

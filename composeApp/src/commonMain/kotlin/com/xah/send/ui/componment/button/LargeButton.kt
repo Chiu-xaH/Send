@@ -1,4 +1,4 @@
-package com.xah.send.ui.componment
+package com.xah.send.ui.componment.button
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -12,12 +12,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.xah.send.ui.componment.text.ScrollText
 import com.xah.send.ui.style.align.ColumnVertical
+import com.xah.send.ui.util.Constant.CARD_NORMAL_DP
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-
-val CARD_NORMAL_DP : Dp = 2.5.dp
-
 
 @Composable
 fun LargeButton(

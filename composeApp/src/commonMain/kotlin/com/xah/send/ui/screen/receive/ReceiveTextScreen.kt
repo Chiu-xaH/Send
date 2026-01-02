@@ -15,8 +15,8 @@ import androidx.compose.ui.Modifier
 import com.xah.send.logic.model.state.ReceiveTask
 import com.xah.send.logic.util.showToast
 import com.xah.send.ui.style.CustomFloatingActionButtonShadow
-import com.xah.send.ui.util.GlobalStateHolder
-import com.xah.send.ui.util.LocalAppNavController
+import com.xah.send.ui.viewmodel.GlobalStateHolder
+import com.xah.send.ui.util.navigation.LocalAppNavController
 import org.jetbrains.compose.resources.painterResource
 import send.composeapp.generated.resources.Res
 import send.composeapp.generated.resources.deployed_code

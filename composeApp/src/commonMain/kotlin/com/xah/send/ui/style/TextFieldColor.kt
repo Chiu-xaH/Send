@@ -4,7 +4,7 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import com.xah.send.ui.componment.cardNormalColor
+import com.xah.send.ui.componment.container.cardNormalColor
 
 @Composable
 fun textFiledTransplant(isColorCopy : Boolean = true) : TextFieldColors {

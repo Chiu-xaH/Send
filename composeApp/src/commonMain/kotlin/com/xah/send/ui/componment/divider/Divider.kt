@@ -1,4 +1,4 @@
-package com.xah.send.ui.componment
+package com.xah.send.ui.componment.divider
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -26,6 +26,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.xah.send.ui.util.Constant.ANIMATION_SPEED
+import com.xah.send.ui.util.Constant.APP_HORIZONTAL_DP
 import kotlin.collections.lastOrNull
 
 @Composable

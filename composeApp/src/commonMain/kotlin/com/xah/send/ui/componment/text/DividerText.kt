@@ -1,4 +1,4 @@
-package com.xah.send.ui.componment
+package com.xah.send.ui.componment.text
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -29,12 +29,12 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import com.xah.send.ui.util.Constant.ANIMATION_SPEED
+import com.xah.send.ui.util.Constant.APP_HORIZONTAL_DP
 
-val DIVIDER_TEXT_VERTICAL_PADDING = 9.dp
+private val DIVIDER_TEXT_VERTICAL_PADDING = 9.dp
 
-const val ANIMATION_SPEED = 400
 
-val APP_HORIZONTAL_DP = 16.25.dp
 
 // 小标题
 @Composable

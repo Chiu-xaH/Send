@@ -1,76 +1,23 @@
-package com.xah.send.ui.componment
+package com.xah.send.ui.componment.container
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.xah.send.ui.componment.divider.PaddingHorizontalDivider
-
-
-data class CardBottomButton(
-    val text : String,
-    val show : Boolean = true,
-    val clickable :  (() -> Unit)? = null
-)
-
-private val CARD_BOTTOM_BUTTON_SIZE = 14.sp
-
-@Composable
-fun ColumnScope.CardBottomButtons(buttons : List<CardBottomButton>) {
-    PaddingHorizontalDivider()
-    LazyRow (modifier = Modifier.align(Alignment.End).padding(horizontal = APP_HORIZONTAL_DP)) {
-        items(buttons.size,key = { it }) { index ->
-            val bean = buttons[index]
-            with(bean) {
-                if (show) {
-                    Spacer(Modifier.width(APP_HORIZONTAL_DP))
-                    Text(
-                        text = text,
-                        color =
-                            if (clickable == null)
-                                MaterialTheme.colorScheme.onSurface
-                            else {
-                                if (text.contains("删除")) {
-                                    MaterialTheme.colorScheme.error
-                                } else {
-                                    MaterialTheme.colorScheme.primary
-                                }
-                            },
-                        fontSize = CARD_BOTTOM_BUTTON_SIZE,
-                        modifier = Modifier
-                            .padding(vertical = APP_HORIZONTAL_DP - 5.dp)
-                            .let {
-                                clickable?.let { click ->
-                                    it.clickable { click() }
-                                } ?: it
-                            }
-                    )
-                }
-            }
-        }
-    }
-}
-
+import com.xah.send.ui.util.Constant.APP_HORIZONTAL_DP
+import com.xah.send.ui.util.Constant.CARD_NORMAL_DP
 
 @Composable
 fun CustomCard(
@@ -121,7 +68,7 @@ fun SmallCard(
     }
 }
 
-val SEARCH_FUC_CARD_HEIGHT = 72.dp
+
 @Composable
 fun TransplantListItem(
     headlineContent :  @Composable () -> Unit,
@@ -199,7 +146,5 @@ fun CardListItem(
 
 @Composable
 fun cardNormalColor() : Color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = .05f)
-@Composable
-fun largeCardColor() : Color = MaterialTheme.colorScheme.surfaceVariant
 
 

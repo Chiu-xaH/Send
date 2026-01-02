@@ -5,7 +5,7 @@ import com.xah.send.logic.model.packet.Packet
 import com.xah.send.logic.model.packet.TextPacket
 import com.xah.send.logic.model.state.FileTransferState
 import com.xah.send.logic.model.state.TextTransferState
-import com.xah.send.ui.util.GlobalStateHolder
+import com.xah.send.ui.viewmodel.GlobalStateHolder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

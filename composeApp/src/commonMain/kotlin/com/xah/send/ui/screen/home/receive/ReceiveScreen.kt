@@ -16,10 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.xah.send.ui.model.LinkStatus
-import com.xah.send.ui.style.CenterScreen
-import com.xah.send.ui.style.ColumnVertical
+import com.xah.send.ui.style.align.CenterScreen
+import com.xah.send.ui.style.align.ColumnVertical
 import com.xah.send.ui.style.CustomFloatingActionButtonShadow
-import com.xah.send.ui.util.GlobalStateHolder
+import com.xah.send.ui.viewmodel.GlobalStateHolder
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import send.composeapp.generated.resources.Res

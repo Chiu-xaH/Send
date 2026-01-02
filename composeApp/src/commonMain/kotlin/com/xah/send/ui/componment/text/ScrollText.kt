@@ -1,4 +1,4 @@
-package com.xah.send.ui.componment
+package com.xah.send.ui.componment.text
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
