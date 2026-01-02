@@ -1,4 +1,4 @@
-package com.xah.send.ui.util
+package com.xah.send.ui.util.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
