@@ -1,4 +1,4 @@
-package com.xah.send.ui.screen.receive
+package com.xah.send.ui.screen.home.receive
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -63,7 +63,7 @@ fun ReceiveScreen() {
                         },
                         elevation = CustomFloatingActionButtonShadow()
                     ) {
-                        Text("等待接收文件")
+                        Text("等待接收")
                     }
                 }
             }
@@ -90,10 +90,8 @@ fun ReceiveScreen() {
     }
 }
 
-
-
 @Composable
-fun linkStatusIcon(status : LinkStatus) : Pair<Color, DrawableResource> = when(status) {
+private fun linkStatusIcon(status : LinkStatus) : Pair<Color, DrawableResource> = when(status) {
     LinkStatus.ERROR -> Pair(MaterialTheme.colorScheme.error,Res.drawable.wifi_tethering_error)
     LinkStatus.ON -> Pair(MaterialTheme.colorScheme.primary,Res.drawable.wifi_tethering)
     LinkStatus.OFF -> Pair(MaterialTheme.colorScheme.outline,Res.drawable.wifi_tethering_off)

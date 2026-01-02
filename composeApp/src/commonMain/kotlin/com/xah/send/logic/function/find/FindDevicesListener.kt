@@ -1,4 +1,4 @@
-package com.xah.send.logic.util
+package com.xah.send.logic.function.find
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -11,7 +11,7 @@ import java.net.InetAddress
 import java.net.SocketException
 
 // 发广播
-class UdpHelloListener(
+class FindDevicesListener(
     private val onReceive: (String, InetAddress) -> Unit
 ) {
     private var socket: DatagramSocket? = null
@@ -22,7 +22,7 @@ class UdpHelloListener(
 
         job = scope.launch(Dispatchers.IO) {
             try {
-                socket = DatagramSocket(DISCOVERY_PORT)
+                socket = DatagramSocket(FinsDevicesHelper.DISCOVERY_PORT)
                 val buffer = ByteArray(1024)
 
                 while (isActive) {
