@@ -25,7 +25,6 @@ kotlin {
             implementation(libs.androidx.activity.compose)
         }
         commonMain.dependencies {
-//            implementation(project(":core"))
             implementation(libs.kotlin.stdlib)
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -44,9 +43,6 @@ kotlin {
             // Serialization JSON反序列化
             implementation(libs.kotlinx.serialization.json)
         }
-        commonTest.dependencies {
-            implementation(libs.kotlin.test)
-        }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
@@ -54,16 +50,21 @@ kotlin {
     }
 }
 
+val globalPackageName = "com.xah.send"
+val globalVersionName = libs.versions.global.versionName.get()
+
 android {
-    namespace = "com.xah.send"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    val maxDskVersion = libs.versions.android.maxSdk.get().toInt()
+
+    namespace = globalPackageName
+    compileSdk = maxDskVersion
 
     defaultConfig {
-        applicationId = "com.xah.send"
+        applicationId = globalPackageName
         minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        targetSdk = maxDskVersion
+        versionCode = libs.versions.android.versionCode.get().toInt()
+        versionName = globalVersionName
     }
     packaging {
         resources {
@@ -72,7 +73,9 @@ android {
     }
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = false
+            // R8优化
+            isMinifyEnabled = true
+            isShrinkResources = true
         }
     }
     compileOptions {
@@ -87,12 +90,12 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "com.xah.send.MainKt"
+        mainClass = "$globalPackageName.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "com.xah.send"
-            packageVersion = "1.0.0"
+            packageName = globalPackageName
+            packageVersion = globalVersionName
         }
     }
 }

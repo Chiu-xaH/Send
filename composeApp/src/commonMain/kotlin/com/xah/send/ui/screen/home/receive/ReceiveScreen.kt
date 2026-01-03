@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.xah.send.logic.function.find.DeviceBroadcastHelper
 import com.xah.send.ui.model.LinkStatus
 import com.xah.send.ui.style.align.CenterScreen
 import com.xah.send.ui.style.align.ColumnVertical
@@ -31,13 +32,14 @@ import send.composeapp.generated.resources.wifi_tethering_off
 fun ReceiveScreen() {
     var linkStatus by remember { mutableStateOf(LinkStatus.ON) }
 
-    LaunchedEffect(GlobalStateHolder.localIp) {
+    LaunchedEffect(GlobalStateHolder.localIp, DeviceBroadcastHelper.status) {
         linkStatus = if(GlobalStateHolder.localIp == null) {
             LinkStatus.OFF
         } else {
-            LinkStatus.ON
+            DeviceBroadcastHelper.status
         }
     }
+
     Scaffold(
         floatingActionButton = {
             when(linkStatus) {

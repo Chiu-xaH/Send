@@ -8,35 +8,35 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import com.xah.send.logic.model.state.FileTransferState
+import com.xah.send.logic.model.state.transfer.FileTransferState
 import com.xah.send.logic.model.state.ReceiveTask
+import com.xah.send.logic.util.ClipBoardHelper
+import com.xah.send.logic.util.md5
 import com.xah.send.logic.util.showToast
+import com.xah.send.ui.componment.button.NavigationBackButton
 import com.xah.send.ui.style.CustomFloatingActionButtonShadow
 import com.xah.send.ui.viewmodel.GlobalStateHolder
-import com.xah.send.ui.util.navigation.LocalAppNavController
-import org.jetbrains.compose.resources.painterResource
-import send.composeapp.generated.resources.Res
-import send.composeapp.generated.resources.deployed_code
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReceiveFileScreen() {
-    val navController = LocalAppNavController.current
     val transfer = GlobalStateHolder.currentReceiveTask.collectAsState().value as? ReceiveTask.File ?: return
     val sendData = transfer.meta
     val from = transfer.from
-    val progressFlow by transfer.progress.collectAsState(initial = null)
+    val progressFlow by transfer.state.collectAsState(initial = null)
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -45,29 +45,20 @@ fun ReceiveFileScreen() {
                     Text("来自 ${sendData.from.deviceName}(${from.address.hostAddress})")
                 },
                 navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            navController.popBackStack()
-                        }
-                    ) {
-                        Icon(
-                            painterResource(Res.drawable.deployed_code),
-                            null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                    NavigationBackButton()
                 }
             )
         },
         floatingActionButton = {
             ExtendedFloatingActionButton (
                 onClick = {
-                    // TODO
-                    showToast("正在开发")
+                    scope.launch(Dispatchers.IO) {
+                        showToast("正在开发")
+                    }
                 },
                 elevation = CustomFloatingActionButtonShadow()
             ) {
-                Text("复制")
+                Text("打开文件夹")
             }
         }
     ) { innerPadding ->
@@ -92,7 +83,7 @@ fun ReceiveFileScreen() {
                     }
                     Text("${p.currentBytes}/${p.totalBytes} - ${progress * 100}%")
                     LinearProgressIndicator(
-                        progress = { progress },
+                        progress = { progress.coerceIn(0f,1f) },
                     )
                 }
                 is FileTransferState.Error -> {
@@ -100,7 +91,19 @@ fun ReceiveFileScreen() {
                     p.throwable.message?.let { Text(it) }
                 }
                 is FileTransferState.Completed -> {
-                    Text("完成,位于${(progressFlow as FileTransferState.Completed).file.absolutePath}")
+                    // 检验MD5
+                    val p = (progressFlow as FileTransferState.Completed)
+                    val exceptedMd5 = p.expectedMd5
+                    if(exceptedMd5 != null && exceptedMd5 != p.file.md5()) {
+                        LaunchedEffect(Unit) {
+                            scope.launch(Dispatchers.IO) {
+                                p.file.delete()
+                            }
+                        }
+                        Text("MD5校验失败,已自动删除文件")
+                    } else {
+                        Text("完成,位于${p.file.absolutePath}")
+                    }
                 }
             }
         }

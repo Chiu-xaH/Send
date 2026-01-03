@@ -32,6 +32,7 @@ fun App() {
             val localAddress = GlobalStateHolder.localIp
             val transfer by GlobalStateHolder.currentReceiveTask.collectAsState()
 
+            // 跟随整个应用的生命周期，一直监听是否有人向自己发送内容
             LaunchedEffect(transfer) {
                 when (transfer) {
                     is ReceiveTask.Text -> {
@@ -46,6 +47,7 @@ fun App() {
                 }
             }
 
+            // 首次初始化自己的信息
             LaunchedEffect(localAddress) {
                 if(localAddress == null) {
                     return@LaunchedEffect
@@ -56,6 +58,7 @@ fun App() {
                     Receiver.start(this@LaunchedEffect)
                 }
             }
+
             NavHost(
                 navController = navTopController,
                 startDestination = AppNavRoute.Home.route

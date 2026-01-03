@@ -14,6 +14,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -23,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,70 +32,63 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Dialog
-import com.xah.send.logic.model.device.LocalDevice
-import com.xah.send.logic.model.device.RemoteDevice
+import com.xah.send.logic.function.find.DeviceBroadcastHelper
+import com.xah.send.logic.function.find.DeviceFinder
 import com.xah.send.logic.function.transfer.Sender
-import com.xah.send.logic.model.state.TextTransferState
-import com.xah.send.logic.function.find.FindDevicesListener
-import com.xah.send.logic.function.find.FinsDevicesHelper
+import com.xah.send.logic.model.Platform
+import com.xah.send.logic.model.device.RemoteDevice
+import com.xah.send.logic.model.state.transfer.FileTransferState
+import com.xah.send.logic.model.state.transfer.TextTransferState
+import com.xah.send.logic.util.ClipBoardHelper
 import com.xah.send.logic.util.showToast
-import com.xah.send.ui.componment.container.CardListItem
-import com.xah.send.ui.componment.text.DividerTextExpandedWith
 import com.xah.send.ui.componment.button.LargeButton
+import com.xah.send.ui.componment.container.CardListItem
+import com.xah.send.ui.componment.container.CustomCard
+import com.xah.send.ui.componment.container.TransplantListItem
 import com.xah.send.ui.componment.container.cardNormalColor
+import com.xah.send.ui.componment.text.DividerTextExpandedWith
 import com.xah.send.ui.style.CustomFloatingActionButtonShadow
 import com.xah.send.ui.style.textFiledTransplant
 import com.xah.send.ui.util.Constant.APP_HORIZONTAL_DP
 import com.xah.send.ui.util.Constant.CARD_NORMAL_DP
 import com.xah.send.ui.viewmodel.GlobalStateHolder
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.painterResource
 import send.composeapp.generated.resources.Res
+import send.composeapp.generated.resources.close
 import send.composeapp.generated.resources.content_paste
 import send.composeapp.generated.resources.deployed_code
 import send.composeapp.generated.resources.files
 import send.composeapp.generated.resources.keyboard_alt
 import send.composeapp.generated.resources.send
+import java.io.File
 import java.net.InetSocketAddress
-
+import com.xah.send.logic.util.pickFile
+import com.xah.send.logic.util.getPlatform
+import com.xah.send.logic.util.simpleLog
 
 private val buttonPadding = CARD_NORMAL_DP*4
 
 @Composable
 fun SendScreen() {
-    val scrollState = rememberScrollState()
-    val devices = remember { mutableStateMapOf<String, RemoteDevice>() }
     val scope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
+
+    val devices = remember { mutableStateMapOf<String, RemoteDevice>() }
+    val listener = remember { DeviceFinder(devices) }
+
     var inputAddress by rememberSaveable { mutableStateOf("") }
+    var showTextDialog by remember { mutableStateOf(false) }
     val isInputValid = isValidAddress(inputAddress)
-    var refresh by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(refresh) {
-        withContext(Dispatchers.IO) {
-            FinsDevicesHelper.broadcastHello(GlobalStateHolder.localHelloPacket)
-        }
-    }
+    var sendFile by remember { mutableStateOf<File?>(null) }
+    var sendTextContent by rememberSaveable { mutableStateOf("") }
+    val hasContent = !(sendTextContent.isEmpty() && sendFile == null)
 
-    LaunchedEffect(Unit) {
-        while(true) {
-            // 轮询
-            delay(1000L)
-            refresh++
-        }
-    }
-
-    val listener = remember {
-        FindDevicesListener { msg, address ->
-            val packet = Json.decodeFromString<LocalDevice>(msg)
-            scope.launch(Dispatchers.Main) {
-                FinsDevicesHelper.handleHello(packet, address.hostAddress, devices)
-            }
-        }
-    }
+    var showProgressDialog by remember { mutableStateOf(false) }
+    var progress by remember { mutableStateOf<FileTransferState.Progress?>(null) }
 
     // 释放监听
     DisposableEffect(Unit) {
@@ -105,9 +98,6 @@ fun SendScreen() {
             listener.stop()
         }
     }
-
-    var sendTextContent by rememberSaveable { mutableStateOf("") }
-    var showTextDialog by remember { mutableStateOf(false) }
 
     if(showTextDialog) {
         Dialog (
@@ -166,12 +156,92 @@ fun SendScreen() {
         }
     }
 
+    if(showProgressDialog && progress != null) {
+        val p = (progress!!.currentBytes / progress!!.currentBytes).toFloat()
+        Dialog (
+            onDismissRequest = { showProgressDialog = false }
+        ) {
+            LaunchedEffect(progress) {
+                if(progress == null) {
+                    showProgressDialog = false
+                }
+            }
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                shape = MaterialTheme.shapes.large,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = APP_HORIZONTAL_DP)
+            ) {
+                Column (modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    LinearProgressIndicator(
+                        progress = { p.coerceIn(0f,1f) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = APP_HORIZONTAL_DP)
+                            .padding(bottom = buttonPadding)
+                            .padding(horizontal = APP_HORIZONTAL_DP)
+                    )
+                    Text(
+                        "${progress!!.currentBytes}/${progress!!.totalBytes} ${p*100}%",
+                        modifier = Modifier
+                            .padding(bottom = APP_HORIZONTAL_DP)
+                    )
+                }
+            }
+        }
+    }
+
+    val sendAction : suspend (InetSocketAddress) -> Unit =  m@ { sendToAddress ->
+        if(!hasContent) {
+            showToast("要发送的内容为空")
+            return@m
+        }
+        if(sendTextContent.isNotEmpty() && sendFile == null) {
+            Sender.sendText(sendToAddress,sendTextContent).collect { state ->
+                when(state) {
+                    is TextTransferState.Error -> {
+                        showToast("发送失败")
+                    }
+                    is TextTransferState.Progress -> {
+
+                    }
+                    is TextTransferState.Completed -> {
+                        showToast("发送完成")
+                    }
+                }
+            }
+        } else if(sendTextContent.isEmpty() && sendFile != null) {
+            Sender.sendFile(sendToAddress, sendFile!!).collect { state ->
+                when(state) {
+                    is FileTransferState.Error -> {
+                        progress = null
+                        showToast("发送失败")
+                    }
+                    is FileTransferState.Progress -> {
+                        if(showProgressDialog == false) {
+                            showProgressDialog = true
+                        }
+                        progress = state
+                    }
+                    is FileTransferState.Completed -> {
+                        progress = null
+                        showToast("发送完成")
+                    }
+                }
+            }
+        } else {
+            progress = null
+            showToast("异常")
+        }
+    }
+
     Scaffold(
         floatingActionButton = {
             ExtendedFloatingActionButton (
                 onClick = {
                     // 手动刷新
-                    refresh++
+                    scope.launch {
+                        DeviceBroadcastHelper.broadcastSelf()
+                    }
                 },
                 elevation = CustomFloatingActionButtonShadow()
             ) {
@@ -184,13 +254,13 @@ fun SendScreen() {
                 .padding(innerPadding)
                 .verticalScroll(scrollState)
         ) {
-            DividerTextExpandedWith("发送内容") {
+            DividerTextExpandedWith("发送类型") {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = APP_HORIZONTAL_DP)
                 ) {
-                    // TODO 文件
+                    // TODO 拖拽文件
                     LargeButton(
                         icon = Res.drawable.files,
                         text = "文件",
@@ -199,7 +269,9 @@ fun SendScreen() {
                             .weight(1/3f)
                             .padding(end = buttonPadding)
                     ) {
-
+                        sendTextContent = ""
+                        sendFile = pickFile()
+                        // TODO 文件
                     }
                     LargeButton(
                         icon = Res.drawable.keyboard_alt,
@@ -213,6 +285,7 @@ fun SendScreen() {
                     ) {
                         // 录入文本
                         showTextDialog = true
+                        sendFile = null
                     }
                     // TODO 剪切板
                     LargeButton(
@@ -224,13 +297,66 @@ fun SendScreen() {
                             .fillMaxWidth()
                             .weight(1/3f)
                     ) {
-                        showToast("正在开发")
+                        sendFile = null
+                        ClipBoardHelper.paste()?.let { text ->
+                            sendTextContent = text
+                            showToast("获取剪切板完成，可发送")
+                        }
+                    }
+                }
+                if(hasContent) {
+                    CustomCard (
+                        color = cardNormalColor(),
+                        modifier = Modifier.padding(top = buttonPadding - CARD_NORMAL_DP)
+                    ) {
+                        TransplantListItem(
+                            headlineContent = { Text(
+                                // TODO 互斥
+                                if(sendTextContent.isNotEmpty() && sendFile == null) {
+                                    sendTextContent
+                                } else if(sendTextContent.isEmpty() && sendFile != null) {
+                                    sendFile!!.absolutePath
+                                } else {
+                                    "异常"
+                                }
+                            ) },
+                            leadingContent = {
+                                // TODO 展示类型
+                                Icon(
+                                    painterResource(
+                                        if(sendTextContent.isNotEmpty() && sendFile == null) {
+                                            Res.drawable.keyboard_alt
+                                        } else if(sendTextContent.isEmpty() && sendFile != null) {
+                                            Res.drawable.files
+                                        } else {
+                                            Res.drawable.deployed_code
+                                        }
+                                    ),
+                                    null
+                                )
+                            },
+                            trailingContent = {
+                                IconButton(onClick = {
+                                    sendFile = null
+                                    sendTextContent = ""
+                                }) {
+                                    Icon(
+                                        painterResource(Res.drawable.close),
+                                        null,
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            },
+                            overlineContent = {
+                                Text("发送区")
+                            }
+                        )
                     }
                 }
             }
             DividerTextExpandedWith("发送至") {
                 devices.values.forEach { device ->
-                    val isLocalDevice = GlobalStateHolder.localHelloPacket.deviceId == device.deviceId
+                    val isLocalDevice = GlobalStateHolder.localDevicePacket.deviceId == device.deviceId
                     val sendToAddress = InetSocketAddress(device.ip,device.tcpPort)
                     if(isLocalDevice) {
                         GlobalStateHolder.localIp = sendToAddress
@@ -264,24 +390,7 @@ fun SendScreen() {
                             } else {
                                 it.clickable {
                                     scope.launch {
-                                        if(sendTextContent.isEmpty()) {
-                                            showToast("要发送的文本为空")
-                                            return@launch
-                                        }
-                                        Sender.sendText(sendToAddress,sendTextContent).collect { state ->
-                                            when(state) {
-                                                is TextTransferState.Error -> {
-                                                    withContext(Dispatchers.IO) {
-                                                        state.throwable.printStackTrace()
-                                                    }
-                                                    showToast("发送失败${state.throwable.message}")
-                                                }
-                                                is TextTransferState.Progress -> {}
-                                                is TextTransferState.Completed -> {
-                                                    showToast("发送完成")
-                                                }
-                                            }
-                                        }
+                                        sendAction(sendToAddress)
                                     }
                                 }
                             }
@@ -302,25 +411,9 @@ fun SendScreen() {
                             enabled = isInputValid != null,
                             onClick = {
                                 scope.launch {
-                                    if(sendTextContent.isEmpty()) {
-                                        showToast("要发送的文本为空")
-                                        return@launch
+                                    scope.launch {
+                                        sendAction(isInputValid!!)
                                     }
-                                    Sender.sendText(isInputValid!!,sendTextContent).collect { state ->
-                                        when(state) {
-                                            is TextTransferState.Error -> {
-                                                withContext(Dispatchers.IO) {
-                                                    state.throwable.printStackTrace()
-                                                }
-                                                showToast("发送失败${state.throwable.message}")
-                                            }
-                                            is TextTransferState.Progress -> {}
-                                            is TextTransferState.Completed -> {
-                                                showToast("发送完成")
-                                            }
-                                        }
-                                    }
-                                    showToast("发送完成")
                                 }
                             }
                         ) {
@@ -333,7 +426,6 @@ fun SendScreen() {
         }
     }
 }
-
 
 // IP:Port
 private fun isValidAddress(str: String): InetSocketAddress? {
@@ -360,7 +452,5 @@ private fun isValidAddress(str: String): InetSocketAddress? {
         null
     }
 }
-
-
 
 

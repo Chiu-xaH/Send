@@ -12,8 +12,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.xah.send.logic.function.find.FinsDevicesHelper
 import com.xah.send.logic.function.transfer.Receiver
+import com.xah.send.logic.util.Constant.FIND_DEVICES_PORT
 import com.xah.send.logic.util.showToast
 import com.xah.send.ui.componment.container.CustomCard
 import com.xah.send.ui.componment.text.DividerTextExpandedWith
@@ -38,7 +38,7 @@ fun SettingsScreen() {
                 CustomCard (color = cardNormalColor()) {
                     TransplantListItem(
                         headlineContent = { Text("修改广播端口") },
-                        supportingContent = { Text(FinsDevicesHelper.DISCOVERY_PORT.toString()) },
+                        supportingContent = { Text(FIND_DEVICES_PORT.toString()) },
                         modifier = Modifier.clickable {
                             showToast("正在开发")
                         }

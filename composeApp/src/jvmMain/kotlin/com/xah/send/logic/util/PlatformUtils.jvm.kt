@@ -30,7 +30,7 @@ actual fun showToast(msg: String) {
     }
 }
 
-actual fun startUrl(url: String) {
+actual fun startWebUrl(url: String) {
     if (Desktop.isDesktopSupported()) {
         val desktop = Desktop.getDesktop()
         if (desktop.isSupported(Desktop.Action.BROWSE)) {

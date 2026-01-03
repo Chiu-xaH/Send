@@ -1,7 +1,6 @@
 package com.xah.send.ui.componment.container
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
@@ -43,31 +42,12 @@ fun CustomCard(
     }
 }
 
-
 @Composable
 fun mixedCardNormalColor(): Color {
     val overlay = cardNormalColor()
     val base = MaterialTheme.colorScheme.surface
     return overlay.compositeOver(base)
 }
-// 小卡片
-@Composable
-fun SmallCard(
-    modifier: Modifier = Modifier.fillMaxSize(),
-    color : Color? = null,
-    shadow : Dp = 0.dp,
-    content: @Composable () -> Unit
-) {
-    Card(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.small,
-        elevation = CardDefaults.cardElevation(shadow),
-        colors = CardDefaults.cardColors(containerColor = color ?: cardNormalColor())
-    ) {
-        content()
-    }
-}
-
 
 @Composable
 fun TransplantListItem(
@@ -122,7 +102,6 @@ private fun PCardListItem(
         )
     }
 }
-
 
 @Composable
 fun CardListItem(

@@ -3,11 +3,13 @@ package com.xah.send.logic.function.transfer
 import com.xah.send.logic.model.packet.FileMetaPacket
 import com.xah.send.logic.model.packet.Packet
 import com.xah.send.logic.model.packet.TextPacket
-import com.xah.send.logic.model.state.FileTransferState
-import com.xah.send.logic.model.state.TextTransferState
+import com.xah.send.logic.model.state.transfer.FileTransferState
+import com.xah.send.logic.model.state.transfer.TextTransferState
+import com.xah.send.logic.util.md5
 import com.xah.send.ui.viewmodel.GlobalStateHolder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
@@ -19,7 +21,15 @@ import java.io.File
 import java.net.InetSocketAddress
 import java.net.Socket
 
+/**
+ * 发送器
+ */
 object Sender {
+    /**
+     * 向某地址发送文本
+     * @param address 目标设备的InetSocketAddress(IP地址,端口号)
+     * @param text 发送的文本
+     */
     fun sendText(
         address: InetSocketAddress,
         text: String
@@ -33,7 +43,7 @@ object Sender {
 
                     val packet = TextPacket(
                         text = text,
-                        from = GlobalStateHolder.localHelloPacket
+                        from = GlobalStateHolder.localDevicePacket
                     )
 
                     val bytes = Json.Default
@@ -53,65 +63,68 @@ object Sender {
         }
     }.flowOn(Dispatchers.IO)
 
-
-    fun sendFileWithProgress(
+    /**
+     * 向某地址发送文件
+     * @param address 目标设备的InetSocketAddress(IP地址,端口号)
+     * @param file 发送的文件
+     */
+    fun sendFile(
         address: InetSocketAddress,
         file: File
     ): Flow<FileTransferState> = flow {
-        try {
-            withContext(Dispatchers.IO) {
-                Socket().use { socket ->
-                    socket.connect(address, 5_000)
 
-                    val out = DataOutputStream(
-                        BufferedOutputStream(socket.getOutputStream())
+        Socket().use { socket ->
+            socket.connect(address, 5_000)
+
+            val out = DataOutputStream(
+                BufferedOutputStream(socket.getOutputStream())
+            )
+
+            // 发送元信息
+            val meta = FileMetaPacket(
+                fileName = file.name,
+                fileSize = file.length(),
+                md5 = file.md5(),
+                from = GlobalStateHolder.localDevicePacket
+            )
+
+            val metaBytes = Json.encodeToString<Packet>(meta)
+                .toByteArray(Charsets.UTF_8)
+
+            out.writeInt(metaBytes.size)
+            out.write(metaBytes)
+            out.flush()
+
+            // 发送文件 + 进度
+            val buffer = ByteArray(8 * 1024)
+            var sentBytes = 0L
+            val totalBytes = file.length()
+
+            file.inputStream().use { fis ->
+                while (true) {
+                    val read = fis.read(buffer)
+                    if (read <= 0) break
+
+                    out.write(buffer, 0, read)
+                    sentBytes += read
+
+                    emit(
+                        FileTransferState.Progress(
+                            currentBytes = sentBytes,
+                            totalBytes = totalBytes
+                        )
                     )
-
-                    // 1. 发送文件元信息
-                    val meta = FileMetaPacket(
-                        fileName = file.name,
-                        fileSize = file.length(),
-                        mime = null,
-                        from = GlobalStateHolder.localHelloPacket
-                    )
-
-                    val metaBytes = Json.Default
-                        .encodeToString<Packet>(meta)
-                        .toByteArray(Charsets.UTF_8)
-
-                    out.writeInt(metaBytes.size)
-                    out.write(metaBytes)
-                    out.flush()
-
-                    // 2. 发送文件内容（带进度）
-                    val buffer = ByteArray(8 * 1024)
-                    var sentBytes = 0L
-                    val totalBytes = file.length()
-
-                    file.inputStream().use { fis ->
-                        while (true) {
-                            val read = fis.read(buffer)
-                            if (read <= 0) break
-
-                            out.write(buffer, 0, read)
-                            sentBytes += read
-
-                            emit(
-                                FileTransferState.Progress(
-                                    currentBytes = sentBytes,
-                                    totalBytes = totalBytes
-                                )
-                            )
-                        }
-                    }
-
-                    out.flush()
-
-                    emit(FileTransferState.Completed(file))
                 }
             }
-        } catch (e: Throwable) {
-            emit(FileTransferState.Error(e))
+
+            out.flush()
+
+            emit(FileTransferState.Completed(file, expectedMd5 = null))
         }
+
+    }.catch { e ->
+        e.printStackTrace()
+        emit(FileTransferState.Error(e))
     }.flowOn(Dispatchers.IO)
+
 }

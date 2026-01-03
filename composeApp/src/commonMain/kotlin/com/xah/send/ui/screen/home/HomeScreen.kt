@@ -4,16 +4,21 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.xah.send.logic.function.find.DeviceBroadcastHelper
 import com.xah.send.ui.model.navigation.home.HomeNavigationRoute
 import com.xah.send.ui.screen.home.receive.ReceiveScreen
 import com.xah.send.ui.screen.home.send.SendScreen
 import com.xah.send.ui.screen.home.settings.SettingsScreen
 import com.xah.send.ui.util.navigation.currentRouteWithoutArgs
 import com.xah.send.ui.util.navigation.navigateForBottomBar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.painterResource
 
 private val navigationItems = listOf(
@@ -29,6 +34,15 @@ fun HomeScreen() {
     val currentPage = navigationItems.find {
         navController.currentRouteWithoutArgs() == it.route
     } ?: defaultPage
+
+    // 在主页时一直轮询发送自己的信号，让其他设备探测到
+    LaunchedEffect(Unit) {
+        while(true) {
+            // 轮询
+            DeviceBroadcastHelper.broadcastSelf()
+            delay(DeviceBroadcastHelper.TIME)
+        }
+    }
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {

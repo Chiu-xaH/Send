@@ -7,10 +7,12 @@ import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 import com.xah.send.ui.screen.App
 
+const val WINDOW_NAME = "Send"
+
 fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
-        title = "Send",
+        title = WINDOW_NAME,
         state = WindowState(position = WindowPosition.Aligned(Alignment.Center)),
 //        alwaysOnTop = true
     ) {

@@ -23,7 +23,7 @@ actual fun showToast(msg: String) {
     ToastUtil.showToast(MyApplication.context,msg)
 }
 
-actual fun startUrl(url: String) {
+actual fun startWebUrl(url: String) {
     try {
         val it = Intent(Intent.ACTION_VIEW, url.toUri())
         it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

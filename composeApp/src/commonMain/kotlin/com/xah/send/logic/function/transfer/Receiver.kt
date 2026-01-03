@@ -3,17 +3,20 @@ package com.xah.send.logic.function.transfer
 import com.xah.send.logic.model.packet.FileMetaPacket
 import com.xah.send.logic.model.packet.Packet
 import com.xah.send.logic.model.packet.TextPacket
-import com.xah.send.logic.model.state.FileTransferState
+import com.xah.send.logic.model.state.transfer.FileTransferState
 import com.xah.send.logic.model.state.ReceiveTask
 import com.xah.send.logic.util.getPublicDownloadFolder
 import com.xah.send.ui.viewmodel.GlobalStateHolder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.BufferedInputStream
 import java.io.DataInputStream
@@ -21,25 +24,45 @@ import java.io.File
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 
+/**
+ * 接收器
+ */
 object Receiver {
+    /**
+     * 服务实例
+     */
     private var serverSocket: ServerSocket? = null
+
+    /**
+     * 默认接收文件的存放路径
+     */
     val saveDir = getPublicDownloadFolder()
 
+    /**
+     * 启动接收器
+     * @param scope 生命周期作用域
+     */
     fun start(
-        scope: CoroutineScope,
+        scope: CoroutineScope
     ) {
-        if (serverSocket != null) return  // 已启动
-
-        serverSocket = startServer(
-            scope = scope,
-        )
+        if (serverSocket != null) {
+            return  // 已启动
+        }
+        serverSocket = startServer(scope)
     }
 
+    /**
+     * 停止接收器
+     */
     fun stop() {
         serverSocket?.close()
         serverSocket = null
     }
 
+    /**
+     * 启动接收器
+     * @param scope 生命周期作用域
+     */
     fun startServer(
         scope: CoroutineScope,
     ): ServerSocket {
@@ -69,8 +92,10 @@ object Receiver {
                                 }
 
                                 is FileMetaPacket -> {
-                                    val flow = receiveFileAsFlow(packet, input)
-                                    GlobalStateHolder.currentReceiveTask.value = ReceiveTask.File(it.remoteSocketAddress as InetSocketAddress, packet, flow)
+                                    val state = MutableStateFlow<FileTransferState>(FileTransferState.Progress(0, packet.fileSize))
+                                    GlobalStateHolder.currentReceiveTask.value = ReceiveTask.File(it.remoteSocketAddress as InetSocketAddress, packet, state)
+                                    // 在 socket.use 生命周期内 collect
+                                    receiveFile(packet, input).collect { state.value = it }
                                 }
                             }
                         }
@@ -86,8 +111,12 @@ object Receiver {
         return serverSocket
     }
 
+    /**
+     * 解决同名文件冲突
+     * @param dir 要存放的路径
+     * @param fileName 文件名
+     */
     private fun resolveFileConflict(
-        dir: File,
         fileName: String
     ): File {
         val dotIndex = fileName.lastIndexOf('.')
@@ -112,19 +141,23 @@ object Receiver {
                 extension != null -> "$baseName ($index)$extension"
                 else -> "$baseName ($index)"
             }
-            candidate = File(dir, name)
+            candidate = File(saveDir, name)
             index++
         } while (candidate.exists())
 
         return candidate
     }
 
-
-    fun receiveFileAsFlow(
+    /**
+     * 接收文件并保存
+     * @param meta FileMetaPacket
+     * @param input DataInputStream
+     */
+    fun receiveFile(
         meta: FileMetaPacket,
         input: DataInputStream
     ): Flow<FileTransferState> = flow {
-        val outFile = resolveFileConflict(saveDir, meta.fileName)
+        val outFile = resolveFileConflict(meta.fileName)
 
         var received = 0L
         val buffer = ByteArray(8 * 1024)
@@ -152,11 +185,10 @@ object Receiver {
                 }
             }
 
-            emit(FileTransferState.Completed(outFile))
+            emit(FileTransferState.Completed(outFile, meta.md5))
         } catch (e: Exception) {
             outFile.delete()
             emit(FileTransferState.Error(e))
         }
     }.flowOn(Dispatchers.IO)
-
 }
