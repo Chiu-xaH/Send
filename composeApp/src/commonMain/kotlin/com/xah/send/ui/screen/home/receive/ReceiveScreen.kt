@@ -40,37 +40,7 @@ fun ReceiveScreen() {
         }
     }
 
-    Scaffold(
-        floatingActionButton = {
-            when(linkStatus) {
-                LinkStatus.OFF -> {
-
-                }
-                LinkStatus.ERROR -> {
-                    // TODO 显示报错信息
-                    ExtendedFloatingActionButton (
-                        onClick = {
-
-                        },
-                        elevation = CustomFloatingActionButtonShadow()
-                    ) {
-                        Text("连接失败")
-                    }
-                }
-                LinkStatus.ON -> {
-                    // TODO 发送按钮
-                    ExtendedFloatingActionButton (
-                        onClick = {
-
-                        },
-                        elevation = CustomFloatingActionButtonShadow()
-                    ) {
-                        Text("等待接收")
-                    }
-                }
-            }
-        }
-    ) { innerPadding ->
+    Scaffold { innerPadding ->
         CenterScreen {
             ColumnVertical () {
                 with(linkStatusIcon(linkStatus)) {

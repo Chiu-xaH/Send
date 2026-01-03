@@ -54,7 +54,6 @@ fun App() {
                 }
                 // 监听接收事件
                 withContext(Dispatchers.IO) {
-                    simpleLog("本地初始化完成")
                     Receiver.start(this@LaunchedEffect)
                 }
             }

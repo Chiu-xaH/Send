@@ -1,4 +1,4 @@
-package com.xah.send.logic.jni
+package com.xah.send.logic.jni.inf
 
 import java.io.File
 

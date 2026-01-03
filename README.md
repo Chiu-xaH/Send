@@ -25,9 +25,6 @@
 - 跨平台适配：Kotlin Multiplatform
 - 跨设备传输：Java(java.net)，以 Json 为载体
 
-## 总代码行数
-2426行（不算空白行）
-
 ## 项目目录简介
 ![img.png](src/img.png)
 
@@ -35,7 +32,7 @@
 1. [安装 Android Studio](https://developer.android.com/studio)
 2. 用 Android Studio 打开此项目并等待构建完成（构建时必须使用 Clash 的 Tun 模式）
 3. 以 Debug 环境运行
-- 在计算机上运行
+- 在 PC 上运行
 ```bash
 ./gradlew composeApp:run
 ```
@@ -43,10 +40,15 @@
 
 ![img.png](src/run.png)
 
+4. 打包
 
-## 后续完善
-1. 发送提速 
-2. 安卓端低版本权限适配 
-3. 安卓端选择文件的适配 
-4. 完成后支持打开文件 
-5. 预估时间、速度显示
+- 打包 PC 版
+
+```bash
+./gradlew composeApp:packageDistributionForCurrentOS 
+```
+
+- 打包 Android Debug 版
+
+![img.png](src/debug.png)
+

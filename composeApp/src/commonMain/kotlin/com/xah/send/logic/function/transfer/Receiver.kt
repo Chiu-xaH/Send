@@ -6,28 +6,32 @@ import com.xah.send.logic.model.packet.TextPacket
 import com.xah.send.logic.model.state.transfer.FileTransferState
 import com.xah.send.logic.model.state.ReceiveTask
 import com.xah.send.logic.util.getPublicDownloadFolder
+import com.xah.send.logic.util.resolveFileConflict
+import com.xah.send.logic.util.simpleLog
 import com.xah.send.ui.viewmodel.GlobalStateHolder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.BufferedInputStream
 import java.io.DataInputStream
-import java.io.File
 import java.net.InetSocketAddress
 import java.net.ServerSocket
+import java.net.Socket
 
 /**
  * 接收器
  */
 object Receiver {
+    /**
+     * 当前传输，用于双方切断传输
+     */
+    private var currentSocket: Socket? = null
     /**
      * 服务实例
      */
@@ -72,6 +76,7 @@ object Receiver {
             try {
                 while (isActive) {
                     val socket = serverSocket.accept()
+                    currentSocket = socket
                     launch {
                         socket.use {
                             val input = DataInputStream(BufferedInputStream(it.getInputStream()))
@@ -112,40 +117,12 @@ object Receiver {
     }
 
     /**
-     * 解决同名文件冲突
-     * @param dir 要存放的路径
-     * @param fileName 文件名
+     * 硬切断传输
      */
-    private fun resolveFileConflict(
-        fileName: String
-    ): File {
-        val dotIndex = fileName.lastIndexOf('.')
-
-        val baseName: String
-        val extension: String?
-
-        if (dotIndex > 0) {
-            baseName = fileName.substring(0, dotIndex)
-            extension = fileName.substring(dotIndex) // 包含 .
-        } else {
-            baseName = fileName
-            extension = null
-        }
-
-        var index = 0
-        var candidate: File
-
-        do {
-            val name = when {
-                index == 0 -> fileName
-                extension != null -> "$baseName ($index)$extension"
-                else -> "$baseName ($index)"
-            }
-            candidate = File(saveDir, name)
-            index++
-        } while (candidate.exists())
-
-        return candidate
+    fun stopReceive() {
+        currentSocket?.close()
+        currentSocket = null
+        simpleLog("终止传输")
     }
 
     /**
@@ -157,7 +134,7 @@ object Receiver {
         meta: FileMetaPacket,
         input: DataInputStream
     ): Flow<FileTransferState> = flow {
-        val outFile = resolveFileConflict(meta.fileName)
+        val outFile = resolveFileConflict(saveDir,meta.fileName)
 
         var received = 0L
         val buffer = ByteArray(8 * 1024)

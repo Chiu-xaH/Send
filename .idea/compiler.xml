@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="Send.core" target="17" />
+      <module name="Send.core.commonMain" target="17" />
+      <module name="Send.core.commonTest" target="17" />
+      <module name="Send.core.jvmMain" target="17" />
+      <module name="Send.core.jvmTest" target="17" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

@@ -1,4 +1,4 @@
-package com.xah.send.logic.util
+package com.xah.send.logic.util.android
 
 import android.util.Log
 
@@ -12,7 +12,7 @@ object LogUtil {
     private enum class Level {
         VERBOSE,INFO,DEBUG,WARN,ERROR
     }
-    
+
     fun verbose(msg : String = "") = baseLog(Level.VERBOSE,msg)
     fun info(msg : String = "") = baseLog(Level.INFO,msg)
     fun debug(msg : String = "") = baseLog(Level.DEBUG,msg)

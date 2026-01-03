@@ -1,4 +1,4 @@
-package com.xah.send.logic.util
+package com.xah.send.logic.util.android
 
 import android.content.Context
 import android.os.Handler
@@ -8,7 +8,7 @@ import android.widget.Toast
 object ToastUtil {
     private var toast : Toast? = null
 
-    fun showToast(context : Context,msg : String) {
+    fun showToast(context : Context, msg : String) {
         Handler(Looper.getMainLooper()).post {
             toast?.cancel()
             toast = Toast.makeText(context, msg, Toast.LENGTH_SHORT)

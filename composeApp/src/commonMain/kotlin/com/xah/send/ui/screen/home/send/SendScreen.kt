@@ -9,12 +9,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -54,7 +54,6 @@ import com.xah.send.ui.util.Constant.CARD_NORMAL_DP
 import com.xah.send.ui.viewmodel.GlobalStateHolder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.painterResource
 import send.composeapp.generated.resources.Res
 import send.composeapp.generated.resources.close
@@ -67,9 +66,14 @@ import java.io.File
 import java.net.InetSocketAddress
 import com.xah.send.logic.util.pickFile
 import com.xah.send.logic.util.getPlatform
-import com.xah.send.logic.util.simpleLog
+import com.xah.send.logic.util.AndroidFilePicker
+import com.xah.send.logic.util.androidCleanCopiedCache
+import com.xah.send.ui.screen.receive.TransferUI
+import com.xah.send.ui.style.align.ColumnVertical
+import send.composeapp.generated.resources.progress_activity
+import send.composeapp.generated.resources.wifi_tethering
 
-private val buttonPadding = CARD_NORMAL_DP*4
+val buttonPadding = CARD_NORMAL_DP*4
 
 @Composable
 fun SendScreen() {
@@ -88,7 +92,7 @@ fun SendScreen() {
     val hasContent = !(sendTextContent.isEmpty() && sendFile == null)
 
     var showProgressDialog by remember { mutableStateOf(false) }
-    var progress by remember { mutableStateOf<FileTransferState.Progress?>(null) }
+    var progressFlow by remember { mutableStateOf<FileTransferState.Progress?>(null) }
 
     // 释放监听
     DisposableEffect(Unit) {
@@ -130,11 +134,11 @@ fun SendScreen() {
                             .padding(horizontal = APP_HORIZONTAL_DP)
                             .padding(bottom = APP_HORIZONTAL_DP)
                     ) {
-                        FilledTonalButton(
+                        Button(
                             onClick = {
                                 sendTextContent = ""
                             },
-                            colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                             shape = MaterialTheme.shapes.medium,
                             modifier = Modifier.fillMaxWidth().weight(1 / 2f)
                         ) {
@@ -156,13 +160,12 @@ fun SendScreen() {
         }
     }
 
-    if(showProgressDialog && progress != null) {
-        val p = (progress!!.currentBytes / progress!!.currentBytes).toFloat()
+    if(showProgressDialog && progressFlow != null) {
         Dialog (
             onDismissRequest = { showProgressDialog = false }
         ) {
-            LaunchedEffect(progress) {
-                if(progress == null) {
+            LaunchedEffect(progressFlow) {
+                if(progressFlow == null) {
                     showProgressDialog = false
                 }
             }
@@ -171,22 +174,39 @@ fun SendScreen() {
                 shape = MaterialTheme.shapes.large,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = APP_HORIZONTAL_DP)
             ) {
-                Column (modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    LinearProgressIndicator(
-                        progress = { p.coerceIn(0f,1f) },
+                ColumnVertical (modifier = Modifier.padding(vertical = APP_HORIZONTAL_DP)) {
+                    TransferUI(progressFlow!!)
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = APP_HORIZONTAL_DP)
-                            .padding(bottom = buttonPadding)
                             .padding(horizontal = APP_HORIZONTAL_DP)
-                    )
-                    Text(
-                        "${progress!!.currentBytes}/${progress!!.totalBytes} ${p*100}%",
-                        modifier = Modifier
-                            .padding(bottom = APP_HORIZONTAL_DP)
-                    )
+                            .padding(top = buttonPadding)
+                    ) {
+                        Button(
+                            onClick = {
+                                Sender.stopSend()
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                            shape = MaterialTheme.shapes.medium,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("中止发送")
+                        }
+                    }
                 }
             }
+        }
+    }
+
+    var openFilePicker by remember { mutableStateOf(false) }
+    AndroidFilePicker(openFilePicker) {
+        sendFile = it
+        openFilePicker = false
+    }
+    // AndroidFilePicker缓存释放
+    LaunchedEffect(sendFile) {
+        if(sendFile == null) {
+            androidCleanCopiedCache()
         }
     }
 
@@ -195,17 +215,17 @@ fun SendScreen() {
             showToast("要发送的内容为空")
             return@m
         }
+        // TODO 这里代码可以优化，合二为一
         if(sendTextContent.isNotEmpty() && sendFile == null) {
             Sender.sendText(sendToAddress,sendTextContent).collect { state ->
                 when(state) {
                     is TextTransferState.Error -> {
-                        showToast("发送失败")
+                        showToast("发送失败(${state.throwable.message})")
                     }
-                    is TextTransferState.Progress -> {
-
-                    }
+                    is TextTransferState.Progress -> {}
                     is TextTransferState.Completed -> {
                         showToast("发送完成")
+                        sendTextContent = ""
                     }
                 }
             }
@@ -213,39 +233,52 @@ fun SendScreen() {
             Sender.sendFile(sendToAddress, sendFile!!).collect { state ->
                 when(state) {
                     is FileTransferState.Error -> {
-                        progress = null
-                        showToast("发送失败")
+                        progressFlow = null
+                        showToast("发送失败(${state.throwable.message})")
                     }
                     is FileTransferState.Progress -> {
                         if(showProgressDialog == false) {
                             showProgressDialog = true
                         }
-                        progress = state
+                        progressFlow = state
                     }
                     is FileTransferState.Completed -> {
-                        progress = null
+                        progressFlow = null
                         showToast("发送完成")
+                        sendFile = null
                     }
                 }
             }
         } else {
-            progress = null
+            progressFlow = null
             showToast("异常")
         }
     }
 
     Scaffold(
         floatingActionButton = {
-            ExtendedFloatingActionButton (
+            var loading by remember { mutableStateOf(false) }
+            FloatingActionButton (
                 onClick = {
                     // 手动刷新
                     scope.launch {
+                        loading = true
                         DeviceBroadcastHelper.broadcastSelf()
+                        loading = false
                     }
                 },
                 elevation = CustomFloatingActionButtonShadow()
             ) {
-                Text("扫描设备")
+                Icon(
+                    painterResource(
+                        if(loading) {
+                            Res.drawable.progress_activity
+                        } else {
+                            Res.drawable.wifi_tethering
+                        }
+                    ),
+                    null
+                )
             }
         }
     ) { innerPadding ->
@@ -269,9 +302,19 @@ fun SendScreen() {
                             .weight(1/3f)
                             .padding(end = buttonPadding)
                     ) {
-                        sendTextContent = ""
-                        sendFile = pickFile()
-                        // TODO 文件
+                        scope.launch {
+                            sendTextContent = ""
+                            when(getPlatform()) {
+                                Platform.DESKTOP ->  {
+                                    with(Dispatchers.IO) {
+                                        sendFile = pickFile()
+                                    }
+                                }
+                                Platform.ANDROID -> {
+                                    openFilePicker = true
+                                }
+                            }
+                        }
                     }
                     LargeButton(
                         icon = Res.drawable.keyboard_alt,
@@ -386,7 +429,9 @@ fun SendScreen() {
                         },
                         modifier = Modifier.let {
                             if(isLocalDevice) {
-                                it
+                                it.clickable {
+                                    sendTextContent = "${sendToAddress.address.hostAddress}:${sendToAddress.port}"
+                                }
                             } else {
                                 it.clickable {
                                     scope.launch {
@@ -401,7 +446,9 @@ fun SendScreen() {
                     shape = MaterialTheme.shapes.medium,
                     colors = textFiledTransplant(),
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = APP_HORIZONTAL_DP, vertical = CARD_NORMAL_DP),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = APP_HORIZONTAL_DP, vertical = APP_HORIZONTAL_DP),
                     value = inputAddress,
                     onValueChange = {
                         inputAddress = it
@@ -452,5 +499,4 @@ private fun isValidAddress(str: String): InetSocketAddress? {
         null
     }
 }
-
 

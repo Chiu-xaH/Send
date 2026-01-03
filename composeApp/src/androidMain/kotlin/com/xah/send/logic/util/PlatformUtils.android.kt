@@ -5,6 +5,8 @@ import android.os.Environment
 import androidx.core.net.toUri
 import com.xah.send.application.MyApplication
 import com.xah.send.logic.model.Platform
+import com.xah.send.logic.util.android.LogUtil
+import com.xah.send.logic.util.android.ToastUtil
 import java.io.File
 
 actual fun getPlatform(): Platform = Platform.ANDROID

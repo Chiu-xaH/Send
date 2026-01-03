@@ -20,11 +20,23 @@ import java.io.DataOutputStream
 import java.io.File
 import java.net.InetSocketAddress
 import java.net.Socket
-
+import com.xah.send.logic.util.simpleLog
 /**
  * 发送器
  */
 object Sender {
+    /**
+     * 当前传输，用于双方切断传输
+     */
+    private var currentSocket: Socket? = null
+    /**
+     * 硬切断传输
+     */
+    fun stopSend() {
+        currentSocket?.close()
+        currentSocket = null
+        simpleLog("终止传输")
+    }
     /**
      * 向某地址发送文本
      * @param address 目标设备的InetSocketAddress(IP地址,端口号)
@@ -39,6 +51,7 @@ object Sender {
         try {
             withContext(Dispatchers.IO) {
                 Socket().use { socket ->
+                    currentSocket = socket
                     socket.connect(address, 5_000)
 
                     val packet = TextPacket(
@@ -59,6 +72,7 @@ object Sender {
 
             emit(TextTransferState.Completed)
         } catch (e: Throwable) {
+            e.printStackTrace()
             emit(TextTransferState.Error(e))
         }
     }.flowOn(Dispatchers.IO)
@@ -74,6 +88,7 @@ object Sender {
     ): Flow<FileTransferState> = flow {
 
         Socket().use { socket ->
+            currentSocket = socket
             socket.connect(address, 5_000)
 
             val out = DataOutputStream(

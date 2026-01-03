@@ -1,4 +1,4 @@
-package com.xah.send.logic.util
+package com.xah.send.logic.util.jvm
 
 import com.xah.send.logic.model.JvmPlatform
 

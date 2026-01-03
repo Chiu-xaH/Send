@@ -1,7 +1,8 @@
 package com.xah.send.logic.jni
 
 import com.xah.send.WINDOW_NAME
-import com.xah.send.logic.util.NativeLoader
+import com.xah.send.logic.jni.inf.IDesktopJni
+import com.xah.send.logic.util.jvm.NativeLoader
 import java.io.File
 
 class WindowsJni() : IDesktopJni {
