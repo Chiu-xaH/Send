@@ -67,7 +67,7 @@ object Receiver {
      * 启动接收器
      * @param scope 生命周期作用域
      */
-    fun startServer(
+    private fun startServer(
         scope: CoroutineScope,
     ): ServerSocket {
         val serverSocket = ServerSocket(GlobalStateHolder.localIp!!.port)
