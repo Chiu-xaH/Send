@@ -1,5 +1,6 @@
 package com.xah.send.logic.function.transfer
 
+import com.xah.send.logic.function.LocalDeviceManager
 import com.xah.send.logic.model.packet.FileMetaPacket
 import com.xah.send.logic.model.packet.Packet
 import com.xah.send.logic.model.packet.TextPacket
@@ -56,7 +57,7 @@ object Sender {
 
                     val packet = TextPacket(
                         text = text,
-                        from = GlobalStateHolder.localDevicePacket
+                        from = LocalDeviceManager.localDevicePacket
                     )
 
                     val bytes = Json.Default
@@ -100,7 +101,7 @@ object Sender {
                 fileName = file.name,
                 fileSize = file.length(),
                 md5 = file.md5(),
-                from = GlobalStateHolder.localDevicePacket
+                from = LocalDeviceManager.localDevicePacket
             )
 
             val metaBytes = Json.encodeToString<Packet>(meta)

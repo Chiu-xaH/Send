@@ -32,6 +32,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Dialog
+import com.xah.send.logic.function.LocalDeviceManager
 import com.xah.send.logic.function.find.DeviceBroadcastHelper
 import com.xah.send.logic.function.find.DeviceFinder
 import com.xah.send.logic.function.transfer.Sender
@@ -399,11 +400,11 @@ fun SendScreen() {
             }
             DividerTextExpandedWith("发送至") {
                 devices.values.forEach { device ->
-                    val isLocalDevice = GlobalStateHolder.localDevicePacket.deviceId == device.deviceId
+                    val isLocalDevice = LocalDeviceManager.localDevicePacket.deviceId == device.deviceId
                     val sendToAddress = InetSocketAddress(device.ip,device.tcpPort)
-                    if(isLocalDevice) {
-                        GlobalStateHolder.localIp = sendToAddress
-                    }
+//                    if(isLocalDevice) {
+//                        GlobalStateHolder.localIp = sendToAddress
+//                    }
                     CardListItem(
                         headlineContent = {
                             Text(device.deviceName)
@@ -413,7 +414,7 @@ fun SendScreen() {
                             if(isLocalDevice) Text("本机")
                         },
                         supportingContent = {
-                            Text("IP ${device.ip} 端口 ${device.tcpPort}")
+                            Text("IP ${LocalDeviceManager.ipv4Address ?: device.ip} 端口 ${device.tcpPort}")
                         },
                         leadingContent = {
                             Icon(
@@ -430,7 +431,7 @@ fun SendScreen() {
                         modifier = Modifier.let {
                             if(isLocalDevice) {
                                 it.clickable {
-                                    sendTextContent = "${sendToAddress.address.hostAddress}:${sendToAddress.port}"
+                                    sendTextContent = "${LocalDeviceManager.ipv4Address}:${sendToAddress.port}"
                                 }
                             } else {
                                 it.clickable {
@@ -488,7 +489,7 @@ private fun isValidAddress(str: String): InetSocketAddress? {
 
     return try {
         val target = InetSocketAddress(parts[0], port)
-        if(target == GlobalStateHolder.localIp) {
+        if(target.address.hostAddress == LocalDeviceManager.ipv4Address && target.port == LocalDeviceManager.tcpPort) {
             // 自己
             null
         } else {

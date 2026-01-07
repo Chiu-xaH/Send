@@ -1,5 +1,6 @@
 package com.xah.send.logic.function.transfer
 
+import com.xah.send.logic.function.LocalDeviceManager
 import com.xah.send.logic.model.packet.FileMetaPacket
 import com.xah.send.logic.model.packet.Packet
 import com.xah.send.logic.model.packet.TextPacket
@@ -70,7 +71,7 @@ object Receiver {
     private fun startServer(
         scope: CoroutineScope,
     ): ServerSocket {
-        val serverSocket = ServerSocket(GlobalStateHolder.localIp!!.port)
+        val serverSocket = ServerSocket(LocalDeviceManager.tcpPort)
 
         scope.launch(Dispatchers.IO) {
             try {

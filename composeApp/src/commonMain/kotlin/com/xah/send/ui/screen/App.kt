@@ -29,7 +29,7 @@ fun App() {
         LocalAppNavController provides navTopController
     ) {
         MaterialTheme {
-            val localAddress = GlobalStateHolder.localIp
+//            val localAddress = GlobalStateHolder.localIp
             val transfer by GlobalStateHolder.currentReceiveTask.collectAsState()
 
             // 跟随整个应用的生命周期，一直监听是否有人向自己发送内容
@@ -48,10 +48,10 @@ fun App() {
             }
 
             // 首次初始化自己的信息
-            LaunchedEffect(localAddress) {
-                if(localAddress == null) {
-                    return@LaunchedEffect
-                }
+            LaunchedEffect(Unit) {
+//                if(localAddress == null) {
+//                    return@LaunchedEffect
+//                }
                 // 监听接收事件
                 withContext(Dispatchers.IO) {
                     Receiver.start(this@LaunchedEffect)

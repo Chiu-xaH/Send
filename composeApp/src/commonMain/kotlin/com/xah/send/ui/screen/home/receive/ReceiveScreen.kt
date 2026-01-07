@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.xah.send.logic.function.LocalDeviceManager
 import com.xah.send.logic.function.find.DeviceBroadcastHelper
 import com.xah.send.ui.model.LinkStatus
 import com.xah.send.ui.style.align.CenterScreen
@@ -32,12 +33,13 @@ import send.composeapp.generated.resources.wifi_tethering_off
 fun ReceiveScreen() {
     var linkStatus by remember { mutableStateOf(LinkStatus.ON) }
 
-    LaunchedEffect(GlobalStateHolder.localIp, DeviceBroadcastHelper.status) {
-        linkStatus = if(GlobalStateHolder.localIp == null) {
-            LinkStatus.OFF
-        } else {
+    LaunchedEffect(DeviceBroadcastHelper.status) {
+        linkStatus =
+//            if(GlobalStateHolder.localIp == null) {
+//            LinkStatus.OFF
+//        } else {
             DeviceBroadcastHelper.status
-        }
+//        }
     }
 
     Scaffold { innerPadding ->
@@ -53,9 +55,7 @@ fun ReceiveScreen() {
                 }
 
                 Text(
-                    GlobalStateHolder.localIp?.let { ip ->
-                        "IPv4 ${GlobalStateHolder.getLocalIpv4Address()} 端口 #${ip.port}"
-                    } ?: ""
+                    "IP ${LocalDeviceManager.ipv4Address} 端口 #${LocalDeviceManager.tcpPort}"
                 )
             }
         }

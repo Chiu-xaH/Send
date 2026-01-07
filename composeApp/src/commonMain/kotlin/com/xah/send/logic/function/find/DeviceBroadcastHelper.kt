@@ -3,6 +3,7 @@ package com.xah.send.logic.function.find
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.xah.send.logic.function.LocalDeviceManager
 import com.xah.send.logic.util.Constant.FIND_DEVICES_PORT
 import com.xah.send.ui.model.LinkStatus
 import com.xah.send.ui.viewmodel.GlobalStateHolder
@@ -44,7 +45,7 @@ object DeviceBroadcastHelper {
             }
 
             val data = Json.encodeToString(
-                GlobalStateHolder.localDevicePacket
+                LocalDeviceManager.localDevicePacket
             ).toByteArray()
 
             socket.use {
