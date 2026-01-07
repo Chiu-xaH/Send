@@ -7,8 +7,11 @@ import com.xah.send.logic.model.device.LocalDevice
 import com.xah.send.logic.model.state.ReceiveTask
 import com.xah.send.logic.util.getSimpleDeviceName
 import kotlinx.coroutines.flow.MutableStateFlow
+import java.net.Inet4Address
 import java.net.InetSocketAddress
+import java.net.NetworkInterface
 import java.net.ServerSocket
+import java.net.SocketException
 import java.util.UUID
 
 /**
@@ -41,4 +44,27 @@ object GlobalStateHolder {
             tcpPort = tcpPort
         )
     }
+
+    fun getLocalIpv4Address(): String? {
+        try {
+            // 获取设备的所有网络接口
+            val interfaces = NetworkInterface.getNetworkInterfaces()
+            while (interfaces.hasMoreElements()) {
+                val iface = interfaces.nextElement()
+                // 遍历网络接口的所有地址
+                val addresses = iface.inetAddresses
+                while (addresses.hasMoreElements()) {
+                    val address = addresses.nextElement()
+                    // 过滤掉回环地址和IPv6地址
+                    if (!address.isLoopbackAddress && address is Inet4Address) {
+                        return address.hostAddress
+                    }
+                }
+            }
+        } catch (e: SocketException) {
+            e.printStackTrace()
+        }
+        return null
+    }
+
 }

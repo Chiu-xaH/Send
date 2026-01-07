@@ -130,7 +130,7 @@ object Receiver {
      * @param meta FileMetaPacket
      * @param input DataInputStream
      */
-    fun receiveFile(
+    private fun receiveFile(
         meta: FileMetaPacket,
         input: DataInputStream
     ): Flow<FileTransferState> = flow {

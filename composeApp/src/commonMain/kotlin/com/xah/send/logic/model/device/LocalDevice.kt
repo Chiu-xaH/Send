@@ -12,5 +12,5 @@ import kotlinx.serialization.Serializable
 data class LocalDevice(
     override val deviceId: String,
     override val deviceName: String,
-    override val tcpPort: Int
+    override val tcpPort: Int,
 ) : Device()

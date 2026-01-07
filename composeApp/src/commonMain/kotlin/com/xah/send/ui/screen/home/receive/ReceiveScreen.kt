@@ -54,7 +54,7 @@ fun ReceiveScreen() {
 
                 Text(
                     GlobalStateHolder.localIp?.let { ip ->
-                        "IP ${ip.address.hostAddress} 端口 #${ip.port}"
+                        "IPv4 ${GlobalStateHolder.getLocalIpv4Address()} 端口 #${ip.port}"
                     } ?: ""
                 )
             }
