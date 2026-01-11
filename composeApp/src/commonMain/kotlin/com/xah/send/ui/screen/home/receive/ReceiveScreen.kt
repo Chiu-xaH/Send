@@ -34,12 +34,7 @@ fun ReceiveScreen() {
     var linkStatus by remember { mutableStateOf(LinkStatus.ON) }
 
     LaunchedEffect(DeviceBroadcastHelper.status) {
-        linkStatus =
-//            if(GlobalStateHolder.localIp == null) {
-//            LinkStatus.OFF
-//        } else {
-            DeviceBroadcastHelper.status
-//        }
+        linkStatus = DeviceBroadcastHelper.status
     }
 
     Scaffold { innerPadding ->
