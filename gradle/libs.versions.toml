@@ -2,9 +2,9 @@
 agp = "8.9.3"
 android-minSdk = "24"
 android-maxSdk = "36"
-android-versionCode = "1"
+android-versionCode = "2"
 # 版本名必须为三段式 X.X.X
-global-versionName = "1.0.0"
+global-versionName = "1.0.1"
 androidx-activity = "1.12.2"
 androidx-lifecycle = "2.9.5"
 composeHotReload = "1.0.0-rc02"

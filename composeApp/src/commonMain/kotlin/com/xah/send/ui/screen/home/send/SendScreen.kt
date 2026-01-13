@@ -52,7 +52,6 @@ import com.xah.send.ui.style.CustomFloatingActionButtonShadow
 import com.xah.send.ui.style.textFiledTransplant
 import com.xah.send.ui.util.Constant.APP_HORIZONTAL_DP
 import com.xah.send.ui.util.Constant.CARD_NORMAL_DP
-import com.xah.send.ui.viewmodel.GlobalStateHolder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -414,7 +413,7 @@ fun SendScreen() {
                             if(isLocalDevice) Text("本机")
                         },
                         supportingContent = {
-                            Text("IP ${LocalDeviceManager.ipv4Address ?: device.ip} 端口 ${device.tcpPort}")
+                            Text("IP ${if(!isLocalDevice) device.ip else LocalDeviceManager.getIpString()} 端口 ${device.tcpPort}")
                         },
                         leadingContent = {
                             Icon(
@@ -431,7 +430,7 @@ fun SendScreen() {
                         modifier = Modifier.let {
                             if(isLocalDevice) {
                                 it.clickable {
-                                    sendTextContent = "${LocalDeviceManager.ipv4Address}:${sendToAddress.port}"
+                                    sendTextContent = "${LocalDeviceManager.ipAddresses[0]}:${sendToAddress.port}"
                                 }
                             } else {
                                 it.clickable {
@@ -489,7 +488,7 @@ private fun isValidAddress(str: String): InetSocketAddress? {
 
     return try {
         val target = InetSocketAddress(parts[0], port)
-        if(target.address.hostAddress == LocalDeviceManager.ipv4Address && target.port == LocalDeviceManager.tcpPort) {
+        if(target.address.hostAddress in LocalDeviceManager.ipAddresses && target.port == LocalDeviceManager.tcpPort) {
             // 自己
             null
         } else {

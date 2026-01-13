@@ -9,8 +9,17 @@ include_directories(bzip)
 add_library(bsdiff_win_master SHARED
         jni/jni-bsdiff.c
         windows/pick_file.c
+        windows/file.c
         windows/warn.c
 )
+
+if (WIN32)
+    target_link_libraries(bsdiff_win_master
+            shell32
+            ole32
+    )
+endif()
+
 
 # 设置库的输出文件名
 set_target_properties(bsdiff_win_master PROPERTIES

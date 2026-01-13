@@ -191,7 +191,7 @@ orleans.codegen.cs
 # RIA/Silverlight projects
 Generated_Code/
 
-# Backup & report files from converting an old project file
+# Backup & report files from converting an old project file.c
 # to a newer Visual Studio version. Backup files are not needed,
 # because we have git ;-)
 _UpgradeReport_Files/
@@ -213,7 +213,7 @@ cmake-build-debug/
 # Microsoft Fakes
 FakesAssemblies/
 
-# GhostDoc plugin setting file
+# GhostDoc plugin setting file.c
 *.GhostDoc.xml
 
 # Node.js Tools for Visual Studio
@@ -222,7 +222,7 @@ FakesAssemblies/
 # Visual Studio 6 build log
 *.plg
 
-# Visual Studio 6 workspace options file
+# Visual Studio 6 workspace options file.c
 *.opt
 
 # Visual Studio LightSwitch build output

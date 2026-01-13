@@ -13,6 +13,9 @@ JNIEXPORT jstring JNICALL Java_com_xah_send_logic_jni_WindowsJni_pickSingleFile
 JNIEXPORT jboolean JNICALL Java_com_xah_send_logic_jni_WindowsJni_warn
   (JNIEnv * env, jobject obj, jstring windowName);
 
+JNIEXPORT jstring JNICALL Java_com_xah_send_logic_jni_WindowsJni_getDownloadFolder
+        (JNIEnv * env, jobject obj);
+
 #ifdef __cplusplus
 }
 #endif

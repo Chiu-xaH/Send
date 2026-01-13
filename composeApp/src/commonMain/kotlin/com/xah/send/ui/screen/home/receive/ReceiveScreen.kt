@@ -1,7 +1,6 @@
 package com.xah.send.ui.screen.home.receive
 
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -20,8 +19,6 @@ import com.xah.send.logic.function.find.DeviceBroadcastHelper
 import com.xah.send.ui.model.LinkStatus
 import com.xah.send.ui.style.align.CenterScreen
 import com.xah.send.ui.style.align.ColumnVertical
-import com.xah.send.ui.style.CustomFloatingActionButtonShadow
-import com.xah.send.ui.viewmodel.GlobalStateHolder
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import send.composeapp.generated.resources.Res
@@ -50,8 +47,9 @@ fun ReceiveScreen() {
                 }
 
                 Text(
-                    "IP ${LocalDeviceManager.ipv4Address} 端口 #${LocalDeviceManager.tcpPort}"
+                    "IP ${LocalDeviceManager.getIpString()}"
                 )
+                Text("端口 #${LocalDeviceManager.tcpPort}")
             }
         }
     }

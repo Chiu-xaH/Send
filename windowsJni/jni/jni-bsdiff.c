@@ -37,3 +37,13 @@ JNIEXPORT jboolean JNICALL Java_com_xah_send_logic_jni_WindowsJni_warn
 
     return result ? JNI_TRUE : JNI_FALSE;
 }
+
+JNIEXPORT jstring JNICALL Java_com_xah_send_logic_jni_WindowsJni_getDownloadFolder
+        (JNIEnv * env, jobject obj) {
+    char* path = get_windows_downloads_path();
+    if (!path) return NULL;
+
+    jstring ret = (*env)->NewStringUTF(env, path);
+    free(path);
+    return ret;
+}

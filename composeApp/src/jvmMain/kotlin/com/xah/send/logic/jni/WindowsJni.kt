@@ -16,6 +16,8 @@ class WindowsJni() : IDesktopJni {
 
     private external fun warn(windowName : String) : Boolean
 
+    external fun getDownloadFolder(): String?
+
     override fun pickFile(): File? {
         return pickSingleFile()?.let {
             File(it)

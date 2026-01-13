@@ -9,5 +9,6 @@
 
 __declspec(dllexport) const char* pick_file();
 bool warn(const wchar_t *windowName);
+char* get_windows_downloads_path(void);
 
 #endif //BSDIFF_WIN_MASTER_MAIN_H
