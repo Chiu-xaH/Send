@@ -32,7 +32,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Dialog
-import com.xah.send.logic.function.LocalDeviceManager
+import com.xah.send.logic.function.find.LocalDeviceManager
 import com.xah.send.logic.function.find.DeviceBroadcastHelper
 import com.xah.send.logic.function.find.DeviceFinder
 import com.xah.send.logic.function.transfer.Sender

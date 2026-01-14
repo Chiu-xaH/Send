@@ -14,7 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.xah.send.logic.function.LocalDeviceManager
+import com.xah.send.logic.function.find.LocalDeviceManager
 import com.xah.send.logic.function.find.DeviceBroadcastHelper
 import com.xah.send.ui.model.LinkStatus
 import com.xah.send.ui.style.align.CenterScreen

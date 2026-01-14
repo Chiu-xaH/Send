@@ -1,6 +1,6 @@
 package com.xah.send.logic.function.transfer
 
-import com.xah.send.logic.function.LocalDeviceManager
+import com.xah.send.logic.function.find.LocalDeviceManager
 import com.xah.send.logic.model.packet.FileMetaPacket
 import com.xah.send.logic.model.packet.Packet
 import com.xah.send.logic.model.packet.TextPacket

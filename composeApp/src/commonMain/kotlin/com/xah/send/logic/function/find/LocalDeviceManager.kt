@@ -1,4 +1,4 @@
-package com.xah.send.logic.function
+package com.xah.send.logic.function.find
 
 import com.xah.send.logic.model.device.LocalDevice
 import com.xah.send.logic.util.getSimpleDeviceName
