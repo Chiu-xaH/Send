@@ -9,7 +9,6 @@ import kotlinx.serialization.Serializable
  * @param from 发送方的信息
  * @param fileName 文件名
  * @param fileSize 文件大小
- * @param mime 文件类型
  */
 @Serializable
 @SerialName("file_meta")
